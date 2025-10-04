@@ -1,36 +1,242 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ConnectPro Frontend
 
-## Getting Started
+A modern, real-time video conferencing web application built with Next.js 15, React 19, and TypeScript.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Instant Meetings**: Start video meetings with one click
+- **Guest Join**: Join meetings without creating an account
+- **Real-time Video & Audio**: High-quality video conferencing with WebRTC
+- **Meeting Chat**: In-meeting text chat for seamless communication
+- **Participant Management**: View and manage meeting participants
+- **Screen Sharing**: Share your screen with other participants
+- **Responsive Design**: Optimized for desktop and mobile devices
+- **Dark Mode UI**: Modern dark-themed interface for comfortable viewing
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 15.5.4](https://nextjs.org/) (App Router)
+- **UI Library**: [React 19.1.0](https://react.dev/)
+- **Language**: [TypeScript 5.x](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS 4.x](https://tailwindcss.com/)
+- **State Management**: [TanStack Query v5](https://tanstack.com/query/latest) (React Query)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **HTTP Client**: [Axios](https://axios-http.com/)
+- **Real-time**: [Socket.IO Client](https://socket.io/)
+- **Testing**: [Jest](https://jestjs.io/) + [React Testing Library](https://testing-library.com/react)
+
+## 📋 Prerequisites
+
+- **Node.js**: v18.x or higher
+- **npm**: v9.x or higher
+
+## 🔧 Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd connectpro-frontend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+
+   Create a `.env.local` file in the root directory:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:7777
+   NEXT_PUBLIC_SOCKET_URL=http://localhost:7777
+   ```
+
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser**
+
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 📁 Project Structure
+
+```
+connectpro-frontend/
+├── app/                          # Next.js App Router pages
+│   ├── (auth)/                  # Authentication route group
+│   │   ├── signin/              # Sign in page
+│   │   └── layout.tsx           # Auth layout
+│   ├── dashboard/               # Dashboard pages
+│   ├── join/                    # Join meeting page
+│   ├── guest-join/              # Guest join page
+│   ├── meeting/[id]/            # Meeting room (dynamic route)
+│   ├── layout.tsx               # Root layout
+│   ├── page.tsx                 # Landing page
+│   └── globals.css              # Global styles
+├── src/
+│   ├── components/              # Reusable components
+│   │   ├── layout/             # Layout components
+│   │   ├── meeting/            # Meeting-related components
+│   │   ├── providers/          # Context providers
+│   │   └── ui/                 # UI components
+│   ├── constants/              # Constants and config
+│   ├── hooks/                  # Custom React hooks
+│   │   ├── queries/           # TanStack Query hooks
+│   │   └── mutations/         # TanStack Mutation hooks
+│   └── lib/                    # Utilities and libraries
+├── public/                      # Static assets
+├── .env.local                   # Environment variables (create this)
+├── package.json
+└── tsconfig.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎯 Available Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Development
+npm run dev          # Start development server
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Build
+npm run build        # Build for production
+npm run start        # Start production server
 
-## Learn More
+# Testing
+npm run test         # Run tests
+npm run test:watch   # Run tests in watch mode
+npm run test:coverage # Run tests with coverage
 
-To learn more about Next.js, take a look at the following resources:
+# Code Quality
+npm run lint         # Run ESLint
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🌐 Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_API_URL` | Backend API URL | `http://localhost:7777` |
+| `NEXT_PUBLIC_SOCKET_URL` | Socket.IO server URL | `http://localhost:7777` |
 
-## Deploy on Vercel
+## 🎨 Key Features & Pages
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Landing Page (`/`)
+- Hero section with branding
+- "Sign In" and "Start Meeting as Guest" CTAs
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Sign In (`/signin`)
+- Email and password authentication
+- Form validation
+- Redirect to dashboard on success
+
+### Dashboard (`/dashboard`)
+- Start instant meetings
+- Join existing meetings with code
+- View recent meetings
+- User profile and notifications
+
+### Join Meeting (`/join`)
+- Enter meeting code
+- Display name input
+- Video/audio preview
+- Camera and microphone controls
+
+### Guest Join (`/guest-join`)
+- Join without authentication
+- Create new meeting as guest
+- Quick settings for camera/microphone
+
+### Meeting Room (`/meeting/[id]`)
+- Real-time video grid (2x2, 3x3, 4x4 auto-layout)
+- Participant sidebar
+- In-meeting chat
+- Meeting controls (mute, video, share, reactions)
+- Recording indicator
+- Connection quality indicator
+
+## 🔐 Authentication Flow
+
+1. User signs in via `/signin`
+2. JWT token stored client-side
+3. Protected routes check authentication
+4. Token sent with API requests via Authorization header
+5. Guest users can join without authentication
+
+## 📊 State Management
+
+Uses TanStack Query (React Query) for server state:
+
+- **Queries**: Data fetching with automatic caching and refetching
+- **Mutations**: Data updates (login, register, create meeting)
+- **Query Keys**: Centralized hierarchical key structure
+- **DevTools**: Available in development mode
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+```
+
+Testing stack:
+- Jest for test runner
+- React Testing Library for component testing
+- jsdom for DOM environment
+
+## 🚀 Deployment
+
+### Build for Production
+
+```bash
+npm run build
+npm run start
+```
+
+### Deploy to Vercel (Recommended)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+
+1. Push your code to GitHub
+2. Import project to Vercel
+3. Add environment variables
+4. Deploy
+
+### Deploy to Other Platforms
+
+The app can be deployed to any platform that supports Next.js:
+- Netlify
+- AWS Amplify
+- Digital Ocean
+- Railway
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+## 🔗 Related Projects
+
+- [ConnectPro Backend](../connectpro-backend) - Node.js/Express backend API
+
+## 📧 Support
+
+For support, email support@connectpro.com or open an issue on GitHub.
+
+---
+
+Built with ❤️ using Next.js and React
