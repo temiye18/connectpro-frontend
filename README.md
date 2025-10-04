@@ -47,8 +47,8 @@ A modern, real-time video conferencing web application built with Next.js 15, Re
 
    Create a `.env.local` file in the root directory:
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:7777
-   NEXT_PUBLIC_SOCKET_URL=http://localhost:7777
+   NEXT_PUBLIC_API_URL=http://localhost:5000
+   NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
    ```
 
 4. **Run the development server**
@@ -115,8 +115,8 @@ npm run lint         # Run ESLint
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `NEXT_PUBLIC_API_URL` | Backend API URL | `http://localhost:7777` |
-| `NEXT_PUBLIC_SOCKET_URL` | Socket.IO server URL | `http://localhost:7777` |
+| `NEXT_PUBLIC_API_URL` | Backend API URL | `http://localhost:5000` |
+| `NEXT_PUBLIC_SOCKET_URL` | Socket.IO server URL | `http://localhost:5000` |
 
 ## 🎨 Key Features & Pages
 
