@@ -253,12 +253,9 @@ This project is licensed under the MIT License.
 
 ## 🔗 Related Projects
 
-- [ConnectPro Backend](../connectpro-backend) - Node.js/Express backend API
+- [ConnectPro Backend](https://github.com/temiye18/connectpro-backend) - Node.js/Express backend API
 
 ## 📧 Support
 
-For support, email support@connectpro.com or open an issue on GitHub.
+For support, email akinyemitemiye18@gmail.com or open an issue on GitHub.
 
----
-
-Built with ❤️ using Next.js and React
