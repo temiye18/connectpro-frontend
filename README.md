@@ -19,7 +19,10 @@ A modern, real-time video conferencing web application built with Next.js 15, Re
 - **UI Library**: [React 19.1.0](https://react.dev/)
 - **Language**: [TypeScript 5.x](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS 4.x](https://tailwindcss.com/)
-- **State Management**: [TanStack Query v5](https://tanstack.com/query/latest) (React Query)
+- **State Management**:
+  - [TanStack Query v5](https://tanstack.com/query/latest) - Server state
+  - [Zustand](https://zustand-demo.pmnd.rs/) - Client state
+- **Notifications**: [Sonner](https://sonner.emilkowal.ski/) - Toast notifications
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **HTTP Client**: [Axios](https://axios-http.com/)
 - **Real-time**: [Socket.IO Client](https://socket.io/)
@@ -85,7 +88,9 @@ connectpro-frontend/
 │   ├── hooks/                  # Custom React hooks
 │   │   ├── queries/           # TanStack Query hooks
 │   │   └── mutations/         # TanStack Mutation hooks
-│   └── lib/                    # Utilities and libraries
+│   ├── lib/                    # Utilities and libraries
+│   ├── services/               # API service functions
+│   └── store/                  # Zustand stores
 ├── public/                      # Static assets
 ├── .env.local                   # Environment variables (create this)
 ├── package.json
@@ -164,12 +169,29 @@ npm run lint         # Run ESLint
 
 ## 📊 State Management
 
-Uses TanStack Query (React Query) for server state:
+The application uses a hybrid state management approach:
 
+### Server State - TanStack Query v5
 - **Queries**: Data fetching with automatic caching and refetching
 - **Mutations**: Data updates (login, register, create meeting)
 - **Query Keys**: Centralized hierarchical key structure
 - **DevTools**: Available in development mode
+
+### Client State - Zustand
+- **Auth Store** (`src/store/authStore.ts`):
+  - User authentication state
+  - JWT token management
+  - Persisted to localStorage
+- **UI Store** (`src/store/uiStore.ts`):
+  - Sidebar, chat, and participants panel visibility
+  - UI preferences and toggles
+
+### Architecture
+```
+├── TanStack Query → Server state (API data, caching)
+├── Zustand → Client state (auth, UI preferences)
+└── useState → Local component state
+```
 
 ## 🧪 Testing
 

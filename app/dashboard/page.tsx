@@ -6,6 +6,7 @@ import { Video, LogIn } from 'lucide-react';
 import { Button } from '@/src/components/ui/Button';
 import { Input } from '@/src/components/ui/Input';
 import { NewMeetingModal } from '@/src/components/meeting/NewMeetingModal';
+import { AuthGuard } from '@/src/components/guards/AuthGuard';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -24,7 +25,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] px-8 py-12">
+    <AuthGuard>
+      <div className="min-h-[calc(100vh-5rem)] px-8 py-12">
       {/* Hero Section */}
       <div className="text-center mb-16">
         <h1 className="text-5xl font-bold text-white mb-4">Ready to meet?</h1>
@@ -110,6 +112,7 @@ export default function DashboardPage() {
         isOpen={isNewMeetingModalOpen}
         onClose={() => setIsNewMeetingModalOpen(false)}
       />
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

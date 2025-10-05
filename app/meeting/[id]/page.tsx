@@ -5,14 +5,16 @@ import { ParticipantsSidebar } from '@/src/components/meeting/ParticipantsSideba
 import { VideoGrid } from '@/src/components/meeting/VideoGrid';
 import { ChatSidebar } from '@/src/components/meeting/ChatSidebar';
 import { MeetingControls } from '@/src/components/meeting/MeetingControls';
+import { AuthGuard } from '@/src/components/guards/AuthGuard';
 
 export default function MeetingRoomPage() {
   const [isChatOpen, setIsChatOpen] = useState(true);
 
   return (
-    <div className="h-screen flex flex-col bg-black">
-      {/* Top Bar */}
-      <div className="h-12 bg-[#0f1419] border-b border-gray-800 flex items-center justify-between px-4">
+    <AuthGuard>
+      <div className="h-screen flex flex-col bg-black">
+        {/* Top Bar */}
+        <div className="h-12 bg-[#0f1419] border-b border-gray-800 flex items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <h1 className="text-white text-sm font-medium">Meeting ID: xyz-abc-123</h1>
           <div className="flex items-center gap-2">
@@ -28,20 +30,21 @@ export default function MeetingRoomPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Participants Sidebar */}
-        <ParticipantsSidebar />
+        {/* Main Content */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Participants Sidebar */}
+          <ParticipantsSidebar />
 
-        {/* Video Grid */}
-        <VideoGrid />
+          {/* Video Grid */}
+          <VideoGrid />
 
-        {/* Chat Sidebar */}
-        {isChatOpen && <ChatSidebar onClose={() => setIsChatOpen(false)} />}
+          {/* Chat Sidebar */}
+          {isChatOpen && <ChatSidebar onClose={() => setIsChatOpen(false)} />}
+        </div>
+
+        {/* Controls */}
+        <MeetingControls onToggleChat={() => setIsChatOpen(!isChatOpen)} />
       </div>
-
-      {/* Controls */}
-      <MeetingControls onToggleChat={() => setIsChatOpen(!isChatOpen)} />
-    </div>
+    </AuthGuard>
   );
 }

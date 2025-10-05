@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Input } from '@/src/components/ui/Input';
 import { Button } from '@/src/components/ui/Button';
 import { VideoPreview } from '@/src/components/meeting/VideoPreview';
+import { AuthGuard } from '@/src/components/guards/AuthGuard';
 import Link from 'next/link';
 
 export default function JoinMeetingPage() {
@@ -27,7 +28,8 @@ export default function JoinMeetingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1f2e] flex items-center justify-center px-4 py-12 relative">
+    <AuthGuard>
+      <div className="min-h-screen bg-[#1a1f2e] flex items-center justify-center px-4 py-12 relative">
       {/* Back Button */}
       <Link
         href="/dashboard"
@@ -75,6 +77,7 @@ export default function JoinMeetingPage() {
           </Button>
         </form>
       </div>
-    </div>
+      </div>
+    </AuthGuard>
   );
 }
