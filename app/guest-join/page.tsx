@@ -1,34 +1,85 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 import { GuestNavbar } from '@/src/components/layout/GuestNavbar';
+import { GuestGuard } from '@/src/components/guards/GuestGuard';
 import { Input } from '@/src/components/ui/Input';
 import { Button } from '@/src/components/ui/Button';
 import { Toggle } from '@/src/components/ui/Toggle';
+import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
+import { useGuestSession } from '@/src/hooks/mutations/useAuth';
+import { useJoinMeeting } from '@/src/hooks/mutations/useMeetings';
+import { getErrorMessage } from '@/src/lib/errors';
 import Link from 'next/link';
 
-export default function GuestJoinPage() {
+function GuestJoinForm() {
+  const searchParams = useSearchParams();
+  const codeFromUrl = searchParams.get('code') || '';
+
   const [name, setName] = useState('');
-  const [meetingCode, setMeetingCode] = useState('');
+  const [meetingCode, setMeetingCode] = useState(codeFromUrl);
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [microphoneEnabled, setMicrophoneEnabled] = useState(true);
 
-  const handleCreateMeeting = () => {
-    // TODO: Implement create new meeting as guest
-    console.log('Create new meeting as guest:', { name, camera: cameraEnabled, microphone: microphoneEnabled });
-  };
+  const guestSessionMutation = useGuestSession();
+  const joinMeetingMutation = useJoinMeeting();
 
   const handleContinueAsGuest = (e: FormEvent) => {
     e.preventDefault();
-    // TODO: Implement join meeting as guest
-    console.log('Continue as guest:', { name, meetingCode, camera: cameraEnabled, microphone: microphoneEnabled });
+
+    if (!name.trim()) {
+      toast.error('Please enter your name');
+      return;
+    }
+
+    if (name.trim().length < 2 || name.trim().length > 50) {
+      toast.error('Name must be between 2 and 50 characters');
+      return;
+    }
+
+    if (!meetingCode.trim()) {
+      toast.error('Please enter a meeting code');
+      return;
+    }
+
+    // First create guest session
+    guestSessionMutation.mutate(
+      { name: name.trim() },
+      {
+        onSuccess: () => {
+          // Then join meeting
+          joinMeetingMutation.mutate(
+            {
+              meetingCode: meetingCode.trim(),
+              name: name.trim(),
+              settings: {
+                camera: cameraEnabled,
+                microphone: microphoneEnabled,
+              },
+            },
+            {
+              onError: (error) => {
+                toast.error(getErrorMessage(error, 'Failed to join meeting'));
+              },
+            }
+          );
+        },
+        onError: (error) => {
+          toast.error(getErrorMessage(error, 'Failed to create guest session'));
+        },
+      }
+    );
   };
+
+  const isLoading = guestSessionMutation.isPending || joinMeetingMutation.isPending;
 
   return (
     <div className="min-h-screen bg-[#1a1f2e]">
       <GuestNavbar />
 
-      <div className="pt-20 min-h-screen flex items-center justify-center px-4 py-12">
+        <div className="pt-20 min-h-screen flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-10">
             <h1 className="text-5xl font-bold text-white mb-3">Join as Guest</h1>
@@ -43,6 +94,7 @@ export default function GuestJoinPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={isLoading}
               className="text-base"
             />
 
@@ -52,26 +104,10 @@ export default function GuestJoinPage() {
               placeholder="Enter meeting code"
               value={meetingCode}
               onChange={(e) => setMeetingCode(e.target.value)}
+              required
+              disabled={isLoading}
               className="text-base"
             />
-
-            {/* OR Divider */}
-            <div className="flex items-center gap-4 py-2">
-              <div className="flex-1 h-px bg-gray-700"></div>
-              <span className="text-gray-400 text-sm">OR</span>
-              <div className="flex-1 h-px bg-gray-700"></div>
-            </div>
-
-            {/* Create New Meeting Button */}
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              fullWidth
-              onClick={handleCreateMeeting}
-            >
-              Create New Meeting
-            </Button>
 
             {/* Quick Settings */}
             <div className="pt-4 space-y-4">
@@ -94,10 +130,10 @@ export default function GuestJoinPage() {
               variant="primary"
               size="lg"
               fullWidth
-              disabled={!name}
+              disabled={isLoading || !name.trim() || !meetingCode.trim()}
               className="mt-6"
             >
-              Continue as Guest
+              {isLoading ? <LoadingSpinner size="sm" /> : 'Continue as Guest'}
             </Button>
 
             {/* Sign in Instead Link */}
@@ -113,5 +149,15 @@ export default function GuestJoinPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function GuestJoinPage() {
+  return (
+    <GuestGuard>
+      <Suspense fallback={<div className="min-h-screen bg-[#1a1f2e] flex items-center justify-center"><LoadingSpinner size="lg" /></div>}>
+        <GuestJoinForm />
+      </Suspense>
+    </GuestGuard>
   );
 }

@@ -4,7 +4,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  avatar: string | null;
+  avatar?: string | null;
+  isGuest?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -36,6 +37,10 @@ export interface LoginData {
   password: string;
 }
 
+export interface GuestData {
+  name: string;
+}
+
 export const authService = {
   // Register new user
   register: async (data: RegisterData): Promise<AuthResponse> => {
@@ -46,6 +51,12 @@ export const authService = {
   // Login user
   login: async (data: LoginData): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/auth/login', data);
+    return response.data;
+  },
+
+  // Create guest session
+  createGuestSession: async (data: GuestData): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>('/auth/guest', data);
     return response.data;
   },
 

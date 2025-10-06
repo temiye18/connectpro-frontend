@@ -9,7 +9,7 @@ import { PasswordInput } from '@/src/components/ui/PasswordInput';
 import { Button } from '@/src/components/ui/Button';
 import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
 import { useLogin } from '@/src/hooks/mutations/useAuth';
-import { GuestGuard } from '@/src/components/guards/GuestGuard';
+import { getErrorMessage } from '@/src/lib/errors';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -41,7 +41,7 @@ export default function SignInPage() {
       { email, password },
       {
         onError: (error) => {
-          toast.error(error.response?.data?.message || 'Invalid email or password');
+          toast.error(getErrorMessage(error, 'Invalid email or password'));
         },
         onSuccess: () => {
           toast.success('Login successful! Redirecting...');
@@ -51,9 +51,8 @@ export default function SignInPage() {
   };
 
   return (
-    <GuestGuard>
-      <>
-        {/* Back Button */}
+    <>
+      {/* Back Button */}
         <Link
           href="/"
           className="fixed top-8 left-8 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors z-10"
@@ -109,7 +108,7 @@ export default function SignInPage() {
         </Button>
 
         <div className="text-center pt-2">
-          <span className="text-gray-400 text-sm">Don't have an account? </span>
+          <span className="text-gray-400 text-sm">Don&apos;t have an account? </span>
           <Link
             href="/signup"
             className="text-blue-500 hover:text-blue-400 text-sm transition-colors"
@@ -119,7 +118,6 @@ export default function SignInPage() {
         </div>
       </form>
         </div>
-      </>
-    </GuestGuard>
+    </>
   );
 }

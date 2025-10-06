@@ -1,10 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Video, Mic, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 import { Modal } from '@/src/components/ui/Modal';
 import { Toggle } from '@/src/components/ui/Toggle';
 import { Button } from '@/src/components/ui/Button';
+import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
+import { getErrorMessage } from '@/src/lib/errors';
+import { meetingService } from '@/src/services/meeting.service';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/src/constants/queryKeys';
 
 interface NewMeetingModalProps {
   isOpen: boolean;
@@ -12,29 +19,72 @@ interface NewMeetingModalProps {
 }
 
 export function NewMeetingModal({ isOpen, onClose }: NewMeetingModalProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [microphoneEnabled, setMicrophoneEnabled] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [meetingId, setMeetingId] = useState<string | null>(null);
+  const [meetingLink, setMeetingLink] = useState('');
 
-  // TODO: Generate actual meeting link from backend
-  const meetingLink = 'https://connectpro.com/meet/a7b5';
+  // Create meeting mutation (without auto-redirect)
+  const createMeetingMutation = useMutation({
+    mutationFn: () =>
+      meetingService.createMeeting({
+        title: 'Instant Meeting',
+        settings: {
+          chat: true,
+          screenSharing: true,
+        },
+      }),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.meetings.recent() });
+      // Backend returns flat response: { meetingId, meetingLink, meetingCode }
+      setMeetingId(response.meetingId || '');
+      setMeetingLink(response.meetingLink || '');
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Failed to create meeting'));
+      onClose();
+    },
+  });
+
+  // Create meeting when modal opens
+  useEffect(() => {
+    if (isOpen && !meetingId) {
+      createMeetingMutation.mutate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setMeetingId(null);
+      setMeetingLink('');
+      setCopied(false);
+    }
+  }, [isOpen]);
 
   const handleCopyLink = async () => {
+    if (!meetingLink) return;
+
     try {
       await navigator.clipboard.writeText(meetingLink);
       setCopied(true);
+      toast.success('Meeting link copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
+    } catch (error: unknown) {
+      console.error('Failed to copy:', error);
+      toast.error('Failed to copy link');
     }
   };
 
   const handleStartMeeting = () => {
-    // TODO: Implement start meeting logic
-    console.log('Starting meeting with settings:', {
-      camera: cameraEnabled,
-      microphone: microphoneEnabled,
-    });
+    if (!meetingId) return;
+
+    // Navigate to meeting room
+    router.push(`/meeting/${meetingId}`);
     onClose();
   };
 
@@ -44,16 +94,24 @@ export function NewMeetingModal({ isOpen, onClose }: NewMeetingModalProps) {
         <h2 className="text-3xl font-bold text-white mb-8">Start your meeting</h2>
 
         {/* Meeting Link */}
-        <div className="bg-[#374151] rounded-lg p-4 mb-8 flex items-center justify-between">
-          <span className="text-gray-300 text-sm flex-1 truncate">{meetingLink}</span>
-          <button
-            onClick={handleCopyLink}
-            className="ml-3 text-blue-500 hover:text-blue-400 font-semibold text-sm transition-colors flex items-center gap-2"
-          >
-            <Copy className="w-4 h-4" />
-            {copied ? 'Copied!' : 'Copy Link'}
-          </button>
-        </div>
+        {createMeetingMutation.isPending ? (
+          <div className="bg-[#374151] rounded-lg p-4 mb-8 flex items-center justify-center">
+            <LoadingSpinner size="sm" />
+            <span className="ml-3 text-gray-300 text-sm">Creating meeting...</span>
+          </div>
+        ) : (
+          <div className="bg-[#374151] rounded-lg p-4 mb-8 flex items-center justify-between">
+            <span className="text-gray-300 text-sm flex-1 truncate">{meetingLink || 'Generating link...'}</span>
+            <button
+              onClick={handleCopyLink}
+              disabled={!meetingLink}
+              className="ml-3 text-blue-500 hover:text-blue-400 font-semibold text-sm transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Copy className="w-4 h-4" />
+              {copied ? 'Copied!' : 'Copy Link'}
+            </button>
+          </div>
+        )}
 
         {/* Quick Settings */}
         <div className="mb-8">
@@ -85,6 +143,7 @@ export function NewMeetingModal({ isOpen, onClose }: NewMeetingModalProps) {
           size="lg"
           fullWidth
           onClick={handleStartMeeting}
+          disabled={!meetingId || createMeetingMutation.isPending}
           className="mb-4"
         >
           Start Meeting

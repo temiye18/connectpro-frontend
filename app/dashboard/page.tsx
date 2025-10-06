@@ -2,16 +2,24 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { Video, LogIn } from 'lucide-react';
+import { Video, LogIn, Calendar } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/src/components/ui/Button';
 import { Input } from '@/src/components/ui/Input';
+import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
 import { NewMeetingModal } from '@/src/components/meeting/NewMeetingModal';
 import { AuthGuard } from '@/src/components/guards/AuthGuard';
+import { useRecentMeetings } from '@/src/hooks/queries/useMeetings';
+import { useStartMeeting } from '@/src/hooks/mutations/useMeetings';
+import { getErrorMessage } from '@/src/lib/errors';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [meetingCode, setMeetingCode] = useState('');
   const [isNewMeetingModalOpen, setIsNewMeetingModalOpen] = useState(false);
+
+  const { data: recentMeetingsData, isLoading: isLoadingMeetings } = useRecentMeetings(10);
+  const startMeetingMutation = useStartMeeting();
 
   const handleJoinMeeting = (e: FormEvent) => {
     e.preventDefault();
@@ -22,6 +30,23 @@ export default function DashboardPage() {
 
   const handleStartMeeting = () => {
     setIsNewMeetingModalOpen(true);
+  };
+
+  const handleStartExistingMeeting = (meetingId: string) => {
+    startMeetingMutation.mutate(meetingId, {
+      onError: (error) => {
+        toast.error(getErrorMessage(error, 'Failed to start meeting'));
+      },
+    });
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   return (
@@ -82,29 +107,49 @@ export default function DashboardPage() {
       {/* Recent Meetings */}
       <div className="max-w-6xl mx-auto">
         <h3 className="text-2xl font-bold text-white mb-8">Your recent meetings</h3>
-        <div className="space-y-4">
-          {/* Meeting Item 1 */}
-          <div className="bg-[#252b3b] rounded-lg p-6 flex items-center justify-between hover:bg-[#2a3142] transition-colors">
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-1">Project Kickoff</h4>
-              <p className="text-gray-400 text-sm">2024-01-20</p>
-            </div>
-            <Button variant="outline" size="md">
-              Start
-            </Button>
-          </div>
 
-          {/* Meeting Item 2 */}
-          <div className="bg-[#252b3b] rounded-lg p-6 flex items-center justify-between hover:bg-[#2a3142] transition-colors">
-            <div>
-              <h4 className="text-lg font-semibold text-white mb-1">Team Sync</h4>
-              <p className="text-gray-400 text-sm">2024-01-15</p>
-            </div>
-            <Button variant="outline" size="md">
-              Start
-            </Button>
+        {isLoadingMeetings ? (
+          <div className="flex justify-center py-12">
+            <LoadingSpinner size="md" />
           </div>
-        </div>
+        ) : recentMeetingsData?.data?.meetings && recentMeetingsData.data.meetings.length > 0 ? (
+          <div className="space-y-4">
+            {recentMeetingsData.data.meetings.map((meeting) => (
+              <div
+                key={meeting._id}
+                className="bg-[#252b3b] rounded-lg p-6 flex items-center justify-between hover:bg-[#2a3142] transition-colors"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                    <Calendar className="w-6 h-6 text-blue-500" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-white mb-1">{meeting.title}</h4>
+                    <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <span>{formatDate(meeting.createdAt)}</span>
+                      <span className="capitalize">{meeting.status}</span>
+                      {meeting.participants.length > 0 && (
+                        <span>{meeting.participants.length} participant{meeting.participants.length !== 1 ? 's' : ''}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={() => handleStartExistingMeeting(meeting._id)}
+                  disabled={startMeetingMutation.isPending || meeting.status === 'ended'}
+                >
+                  {meeting.status === 'ended' ? 'Ended' : 'Start'}
+                </Button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-400">No recent meetings. Start your first meeting!</p>
+          </div>
+        )}
       </div>
 
       {/* New Meeting Modal */}

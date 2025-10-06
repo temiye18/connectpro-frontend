@@ -11,6 +11,7 @@ import { LoadingSpinner } from '@/src/components/ui/LoadingSpinner';
 import { PasswordStrength } from '@/src/components/ui/PasswordStrength';
 import { useRegister } from '@/src/hooks/mutations/useAuth';
 import { GuestGuard } from '@/src/components/guards/GuestGuard';
+import { getErrorMessage } from '@/src/lib/errors';
 
 export default function SignUpPage() {
   const [name, setName] = useState('');
@@ -66,7 +67,7 @@ export default function SignUpPage() {
       { name, email, password },
       {
         onError: (error) => {
-          toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+          toast.error(getErrorMessage(error, 'Registration failed. Please try again.'));
         },
         onSuccess: () => {
           toast.success('Account created successfully! Redirecting...');
