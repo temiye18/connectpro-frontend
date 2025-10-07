@@ -14,7 +14,10 @@ export const useCreateMeeting = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.meetings.recent() });
 
       // Redirect to meeting room
-      router.push(`/meeting/${response.data.meeting._id}`);
+      const meetingId = response.meetingId || response.data?.meeting?._id;
+      if (meetingId) {
+        router.push(`/meeting/${meetingId}`);
+      }
     },
   });
 };

@@ -3,7 +3,8 @@ import { apiClient } from '@/src/lib/axios';
 export interface Meeting {
   _id: string;
   title: string;
-  meetingCode: string;
+  meetingCode?: string; // For create/list endpoints
+  code?: string; // For get details endpoint
   host: {
     _id: string;
     name: string;
@@ -18,7 +19,7 @@ export interface Meeting {
     camera: boolean;
     microphone: boolean;
   }>;
-  settings: {
+  settings?: {
     waitingRoom: boolean;
     chat: boolean;
     screenSharing: boolean;
@@ -27,7 +28,7 @@ export interface Meeting {
   startedAt?: string;
   endedAt?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateMeetingData {
